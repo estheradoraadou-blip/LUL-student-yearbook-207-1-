@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUL Student Yearbook 2026/27</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #F2EDE3;
+  --cream-dark: #E8E0D0;
+  --black: #0F0F0F;
+  --red: #C8102E;
+  --mid: #888;
+  --shadow: rgba(0,0,0,0.18);
+}
+
+body {
+  background: #2A2A2A;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  padding: 20px;
+  user-select: none;
+}
+
+/* ── BOOK CONTAINER ── */
+.book-wrap {
+  position: relative;
+  width: min(900px, 95vw);
+}
+
+.book-ui {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.book {
+  width: 100%;
+  aspect-ratio: 2/1.3;
+  position: relative;
+  perspective: 2000px;
+  cursor: grab;
+}
+
+.book:active { cursor: grabbing; }
+
+/* ── SPREAD (two pages) ── */
+.spread {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.spread.active { display: grid; grid-template-columns: 1fr 1fr; }
+
+/* Page shared styles */
+.page {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background: var(--cream);
+}
+
+.page-left {
+  border-radius: 4px 0 0 4px;
+  box-shadow: inset -4px 0 12px rgba(0,0,0,0.08), -4px 0 20px var(--shadow);
+}
+
+.page-right {
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 4px 0 12px rgba(0,0,0,0.08), 4px 0 20px var(--shadow);
+}
+
+/* Page number */
+.pg-num {
+  position: absolute;
+  bottom: 20px;
+  font-size: 10px;
+  color: var(--mid);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.page-left .pg-num { left: 24px; }
+.page-right .pg-num { right: 24px; }
+
+/* Spine shadow */
+.spread::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  transform: translateX(-50%);
+  background: linear-gradient(to right, rgba(0,0,0,0.15), rgba(0,0,0,0.05), rgba(0,0,0,0.15));
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── NAV ARROWS ── */
+.nav-arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.nav-arrow:hover { background: rgba(255,255,255,0.22); }
+.nav-arrow:disabled { opacity: 0.2; cursor: default; }
+
+/* ── PROGRESS ── */
+.book-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.page-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dot.active { background: white; }
+
+.page-counter {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+
+/* ── PAGE CONTENT STYLES ── */
+
+/* COVER spread */
+.cover-left-page {
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 40px;
+}
+
+.cover-right-page {
+  background: var(--red);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 40px;
+}
+
+.cover-uni {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+
+.cover-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 900;
+  color: white;
+  line-height: 0.95;
+}
+
+.cover-main-title em {
+  font-style: italic;
+  display: block;
+}
+
+.cover-year-big {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(60px, 10vw, 110px);
+  font-weight: 900;
+  color: rgba(255,255,255,0.08);
+  line-height: 1;
+}
+
+.cover-toc {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.toc-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 20px;
+}
+
+.toc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+}
+
+.toc-item:hover .toc-title { color: white; }
+
+.toc-num { font-size: 9px; color: rgba(255,255,255,0.25); width: 20px; font-weight: 600; }
+.toc-title { font-size: 12px; color: rgba(255,255,255,0.7); flex: 1; padding: 0 10px; transition: color 0.2s; }
+.toc-pg { font-size: 9px; color: rgba(255,255,255,0.25); }
+
+.cover-bottom-note {
+  font-size: 9px;
+  color: rgba(255,255,255,0.25);
+  line-height: 1.6;
+}
+
+/* General page padding */
+.pg { padding: 36px 32px 44px; height: 100%; display: flex; flex-direction: column; }
+
+/* Section label */
+.sec-label {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  margin-bottom: 14px;
+}
+.sl-red { background: var(--red); color: white; }
+.sl-black { background: var(--black); color: white; }
+.sl-cream { background: var(--cream-dark); color: var(--black); }
+
+/* Section heading */
+.sec-h {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(22px, 3.5vw, 36px);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+.sec-h em { font-style: italic; color: var(--red); }
+
+.sec-sub {
+  font-size: 11px;
+  color: var(--mid);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+/* Pull quote */
+.pull-quote {
+  border-left: 3px solid var(--red);
+  padding: 12px 16px;
+  margin: 16px 0;
+}
+.pq-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(14px, 2vw, 18px);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--black);
+}
+.pq-author { font-size: 10px; color: var(--mid); margin-top: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Photo placeholder */
+.photo-box {
+  background: var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--mid);
+  border: 1px dashed #C8C0B0;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+  padding: 12px;
+}
+
+.photo-icon { font-size: 24px; opacity: 0.4; }
+
+/* Two col */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* Small card */
+.s-card {
+  background: var(--cream-dark);
+  padding: 14px;
+}
+.s-card-label { font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-bottom: 4px; }
+.s-card-val { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; line-height: 1.2; }
+
+/* Superlative */
+.sup {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cream-dark);
+}
+.sup-label { font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); margin-bottom: 3px; }
+.sup-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
+
+/* Song row */
+.song {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--cream-dark);
+}
+.song-n { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--cream-dark); width: 28px; flex-shrink: 0; }
+.song-t { font-size: 12px; font-weight: 600; }
+.song-a { font-size: 10px; color: var(--mid); }
+
+/* Network row */
+.net-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--cream-dark);
+  font-size: 11px;
+}
+.net-name { font-weight: 600; }
+.net-field { color: var(--mid); font-size: 10px; }
+.net-link {
+  background: var(--black);
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 3px 8px;
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Episode */
+.episode {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--cream-dark);
+  cursor: pointer;
+}
+.ep-n { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--cream-dark); width: 36px; flex-shrink: 0; }
+.ep-t { font-size: 12px; font-weight: 600; }
+.ep-m { font-size: 10px; color: var(--mid); }
+.ep-play-sm { width: 28px; height: 28px; border-radius: 50%; background: var(--black); color: white; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; margin-left: auto; }
+
+/* Divider rule */
+.rule { border: none; border-top: 1px solid var(--cream-dark); margin: 16px 0; }
+
+/* Placeholder note */
+.note {
+  border: 1px dashed #C8C0B0;
+  padding: 14px;
+  font-size: 10px;
+  color: var(--mid);
+  text-align: center;
+  line-height: 1.6;
+  margin-top: auto;
+}
+.note strong { display: block; color: var(--black); margin-bottom: 4px; font-size: 11px; }
+
+/* Dark page */
+.dark-page { background: var(--black); color: white; }
+.dark-page .sec-sub { color: rgba(255,255,255,0.5); }
+.dark-page .rule { border-top-color: rgba(255,255,255,0.1); }
+.dark-page .photo-box { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); }
+.dark-page .s-card { background: rgba(255,255,255,0.07); }
+.dark-page .s-card-label { color: rgba(255,255,255,0.4); }
+.dark-page .s-card-val { color: white; }
+.dark-page .sup { border-bottom-color: rgba(255,255,255,0.08); }
+.dark-page .sup-name { color: white; }
+.dark-page .song { border-bottom-color: rgba(255,255,255,0.08); }
+.dark-page .song-n { color: rgba(255,255,255,0.1); }
+.dark-page .song-t { color: white; }
+.dark-page .note { border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); }
+.dark-page .note strong { color: rgba(255,255,255,0.7); }
+.dark-page .pull-quote { border-left-color: rgba(255,255,255,0.3); }
+.dark-page .pq-text { color: rgba(255,255,255,0.85); }
+.dark-page .pq-author { color: rgba(255,255,255,0.4); }
+.dark-page .net-row { border-bottom-color: rgba(255,255,255,0.08); }
+.dark-page .net-field { color: rgba(255,255,255,0.4); }
+.dark-page .net-link { background: white; color: var(--black); }
+
+/* flex helpers */
+.flex-1 { flex: 1; }
+.mt-auto { margin-top: auto; }
+.gap-sm { display: flex; flex-direction: column; gap: 4px; }
+
+@media (max-width: 600px) {
+  .book { aspect-ratio: 1/1.3; }
+  .spread.active { grid-template-columns: 1fr; }
+  .page-left { display: none; }
+  .page-right { border-radius: 4px; }
+  .spread::after { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="book-wrap">
+  <div class="book-ui">
+    <button class="nav-arrow" id="prevBtn" onclick="changePage(-1)" disabled>‹</button>
+    <div class="book" id="book">
+
+      <!-- SPREAD 0: COVER -->
+      <div class="spread active" data-spread="0">
+        <div class="page page-left cover-left-page">
+          <div class="cover-uni">Lancaster University Leipzig · Student Committee</div>
+          <div>
+            <div class="cover-main-title">LUL<br>Student<br><em>Year-<br>book</em></div>
+          </div>
+          <div class="cover-year-big">26/27</div>
+        </div>
+        <div class="page page-right cover-right-page">
+          <div class="cover-toc">
+            <div class="toc-label">Contents</div>
+            <div class="toc-item" onclick="goToSpread(1)"><span class="toc-num">01</span><span class="toc-title">Welcome Back</span><span class="toc-pg">2</span></div>
+            <div class="toc-item" onclick="goToSpread(2)"><span class="toc-num">02</span><span class="toc-title">Leipzig Life</span><span class="toc-pg">4</span></div>
+            <div class="toc-item" onclick="goToSpread(3)"><span class="toc-num">03</span><span class="toc-title">Student Interviews</span><span class="toc-pg">6</span></div>
+            <div class="toc-item" onclick="goToSpread(4)"><span class="toc-num">04</span><span class="toc-title">Making Sense of It</span><span class="toc-pg">8</span></div>
+            <div class="toc-item" onclick="goToSpread(5)"><span class="toc-num">05</span><span class="toc-title">The LUL Football Classic</span><span class="toc-pg">10</span></div>
+            <div class="toc-item" onclick="goToSpread(6)"><span class="toc-num">06</span><span class="toc-title">Songs We Loved</span><span class="toc-pg">12</span></div>
+            <div class="toc-item" onclick="goToSpread(7)"><span class="toc-num">07</span><span class="toc-title">Memories</span><span class="toc-pg">14</span></div>
+            <div class="toc-item" onclick="goToSpread(8)"><span class="toc-num">08</span><span class="toc-title">Networking Directory</span><span class="toc-pg">16</span></div>
+          </div>
+          <div class="cover-bottom-note">A student-led initiative by the LUL Student Committee.<br>Not an official publication of Lancaster University.</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 1: WELCOME -->
+      <div class="spread" data-spread="1">
+        <div class="page page-left pg">
+          <div class="sec-label sl-red">01 — Welcome Back</div>
+          <div class="sec-h">How did you spend <em>your summer?</em></div>
+          <div class="sec-sub">Every September we come back changed. Here's what the LUL community got up to when the lecture halls went quiet.</div>
+          <div class="pull-quote">
+            <div class="pq-text">"I worked at a summer camp in Germany teaching English to kids. Chaotic, exhausting, and one of the best decisions I made."</div>
+            <div class="pq-author">— Y2 Student</div>
+          </div>
+          <div class="pull-quote">
+            <div class="pq-text">"I stayed in Leipzig. The city is different in summer. Quieter. I spent mornings at Karl-Heine-Kanal pretending to be productive."</div>
+            <div class="pq-author">— Y1 Student</div>
+          </div>
+          <div class="note mt-auto">
+            <strong>Submit your summer story</strong>
+            A few sentences is enough. All years welcome. Form coming soon.
+          </div>
+          <div class="pg-num">2</div>
+        </div>
+        <div class="page page-right pg">
+          <div class="photo-box flex-1" style="min-height:180px;">
+            <div class="photo-icon">📸</div>
+            <span>Add your summer photo here</span>
+          </div>
+          <hr class="rule">
+          <div class="pull-quote">
+            <div class="pq-text">"Coming back to Côte d'Ivoire after a year in Leipzig is strange. You miss both places at the same time."</div>
+            <div class="pq-author">— Y2 Student</div>
+          </div>
+          <div class="pull-quote">
+            <div class="pq-text">"I did absolutely nothing and I regret nothing. Rest is productive. See you in the library in October."</div>
+            <div class="pq-author">— Y3 Student</div>
+          </div>
+          <div class="pg-num" style="right:24px;">3</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 2: LEIPZIG LIFE -->
+      <div class="spread" data-spread="2">
+        <div class="page page-left pg">
+          <div class="sec-label sl-black">02 — Leipzig Life</div>
+          <div class="sec-h">This city is <em>ours</em> too.</div>
+          <div class="sec-sub">Leipzig didn't come with the course description. But it became part of the degree — the Kneipen, the canal, the Saturday markets, the people.</div>
+          <div class="photo-box flex-1" style="min-height:140px;">
+            <div class="photo-icon">📸</div>
+            <span>Karl-Heine-Kanal, Plagwitz, Connewitz…<br>add your Leipzig photo here</span>
+          </div>
+          <hr class="rule">
+          <div class="sec-h" style="font-size:18px;">Genossenschaft.</div>
+          <div class="sec-sub" style="margin-bottom:0;">Leipzig has a long tradition of collective ownership. As international students, we borrowed that spirit — the consulting club, the student committee, the podcast all run on the same idea: we build better together.</div>
+          <div class="pg-num">4</div>
+        </div>
+        <div class="page page-right pg">
+          <div class="sec-label sl-cream">Student Favourites</div>
+          <div class="two-col" style="margin-bottom:14px;">
+            <div class="s-card">
+              <div class="s-card-label">Best Café</div>
+              <div class="s-card-val">Your submission here</div>
+            </div>
+            <div class="s-card">
+              <div class="s-card-label">Best Food Spot</div>
+              <div class="s-card-val">Your submission here</div>
+            </div>
+          </div>
+          <div class="two-col" style="margin-bottom:14px;">
+            <div class="s-card">
+              <div class="s-card-label">Hidden Gem</div>
+              <div class="s-card-val">Your submission here</div>
+            </div>
+            <div class="s-card">
+              <div class="s-card-label">Best Study Spot</div>
+              <div class="s-card-val">Your submission here</div>
+            </div>
+          </div>
+          <div class="photo-box flex-1" style="min-height:120px;">
+            <div class="photo-icon">📸</div>
+            <span>Add a Leipzig photo here</span>
+          </div>
+          <div class="note mt-auto">
+            <strong>Submit your Leipzig recommendations</strong>
+            Best café, park, hidden gem. Form coming soon.
+          </div>
+          <div class="pg-num" style="right:24px;">5</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 3: INTERVIEWS -->
+      <div class="spread" data-spread="3">
+        <div class="page page-left pg">
+          <div class="sec-label sl-red">03 — Student Interviews</div>
+          <div class="sec-h">Real people. <em>Real answers.</em></div>
+          <div class="sec-sub">No LinkedIn bios — just actual conversations.</div>
+          <div class="photo-box" style="height:100px;margin-bottom:14px;">
+            <div class="photo-icon">👤</div>
+            <span>Student photo</span>
+          </div>
+          <div class="gap-sm" style="margin-bottom:10px;">
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;">Student Name</div>
+            <div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;">Y2 · Business Management</div>
+          </div>
+          <hr class="rule">
+          <div style="font-size:10px;font-weight:600;color:var(--mid);margin-bottom:4px;">What did LUL teach you outside the curriculum?</div>
+          <div style="font-size:12px;font-style:italic;line-height:1.6;margin-bottom:12px;">"Answer goes here — honest, funny, or both."</div>
+          <div style="font-size:10px;font-weight:600;color:var(--mid);margin-bottom:4px;">Best decision you made this year?</div>
+          <div style="font-size:12px;font-style:italic;line-height:1.6;">"Answer goes here."</div>
+          <div class="pg-num">6</div>
+        </div>
+        <div class="page page-right pg">
+          <div class="photo-box" style="height:100px;margin-bottom:14px;">
+            <div class="photo-icon">👤</div>
+            <span>Student photo</span>
+          </div>
+          <div class="gap-sm" style="margin-bottom:10px;">
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;">Student Name</div>
+            <div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;">Y3 · Business Management</div>
+          </div>
+          <hr class="rule">
+          <div style="font-size:10px;font-weight:600;color:var(--mid);margin-bottom:4px;">What did LUL teach you outside the curriculum?</div>
+          <div style="font-size:12px;font-style:italic;line-height:1.6;margin-bottom:12px;">"Answer goes here."</div>
+          <div style="font-size:10px;font-weight:600;color:var(--mid);margin-bottom:4px;">Best decision you made this year?</div>
+          <div style="font-size:12px;font-style:italic;line-height:1.6;">"Answer goes here."</div>
+          <div class="note mt-auto">
+            <strong>Want to be interviewed?</strong>
+            3 questions, 10 minutes, completely honest. Sign up coming soon.
+          </div>
+          <div class="pg-num" style="right:24px;">7</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 4: PODCAST -->
+      <div class="spread" data-spread="4">
+        <div class="page page-left pg dark-page">
+          <div class="sec-label" style="background:rgba(255,255,255,0.15);color:white;">04 — Making Sense of It</div>
+          <div class="sec-h" style="color:white;">We cook.<br><em style="color:rgba(255,255,255,0.5);">We talk.</em></div>
+          <div class="sec-sub">10 to 15 minutes. A kitchen. Real conversations about student life, career anxiety, and whatever else comes up while the pasta boils.</div>
+          <div class="photo-box flex-1" style="min-height:140px;">
+            <div class="photo-icon">🎙</div>
+            <span>Add podcast/cooking photo here</span>
+          </div>
+          <div class="pg-num" style="color:rgba(255,255,255,0.3);">8</div>
+        </div>
+        <div class="page page-right pg dark-page">
+          <div class="sec-label" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">Episodes</div>
+          <div class="episode">
+            <div class="ep-n">01</div>
+            <div>
+              <div class="ep-t" style="color:white;">Episode title goes here</div>
+              <div class="ep-m">Coming soon · ~12 min</div>
+            </div>
+            <div class="ep-play-sm">▶</div>
+          </div>
+          <div class="episode">
+            <div class="ep-n">02</div>
+            <div>
+              <div class="ep-t" style="color:white;">Episode title goes here</div>
+              <div class="ep-m">Coming soon · ~14 min</div>
+            </div>
+            <div class="ep-play-sm">▶</div>
+          </div>
+          <div class="episode">
+            <div class="ep-n">03</div>
+            <div>
+              <div class="ep-t" style="color:white;">Episode title goes here</div>
+              <div class="ep-m">Coming soon · ~10 min</div>
+            </div>
+            <div class="ep-play-sm">▶</div>
+          </div>
+          <div class="episode">
+            <div class="ep-n">04</div>
+            <div>
+              <div class="ep-t" style="color:white;">Episode title goes here</div>
+              <div class="ep-m">Coming soon · ~13 min</div>
+            </div>
+            <div class="ep-play-sm">▶</div>
+          </div>
+          <div class="note mt-auto">
+            <strong>Episodes linked here as they drop</strong>
+            Follow the LUL Student Committee for updates.
+          </div>
+          <div class="pg-num" style="right:24px;color:rgba(255,255,255,0.3);">9</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 5: FOOTBALL -->
+      <div class="spread" data-spread="5">
+        <div class="page page-left pg dark-page">
+          <div class="sec-label" style="background:#F5C518;color:#0F0F0F;">05 — Annual Event</div>
+          <div class="sec-h" style="color:white;font-size:clamp(28px,4.5vw,48px);">The LUL<br><em style="color:#F5C518;">Football<br>Classic</em></div>
+          <div class="sec-sub">One field. Two teams. Zero professional athletes. Maximum chaos.</div>
+          <div class="three-col" style="margin-top:auto;">
+            <div class="s-card" style="text-align:center;">
+              <div class="s-card-label">Teams</div>
+              <div class="s-card-val" style="font-size:28px;">2</div>
+            </div>
+            <div class="s-card" style="text-align:center;">
+              <div class="s-card-label">Players</div>
+              <div class="s-card-val" style="font-size:28px;">?</div>
+            </div>
+            <div class="s-card" style="text-align:center;">
+              <div class="s-card-label">Field</div>
+              <div class="s-card-val" style="font-size:28px;">1</div>
+            </div>
+          </div>
+          <div class="pg-num" style="color:rgba(255,255,255,0.3);">10</div>
+        </div>
+        <div class="page page-right pg">
+          <div class="two-col" style="flex:1;gap:2px;">
+            <div class="photo-box flex-1">
+              <div class="photo-icon">📸</div>
+              <span>Main game photo</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
+              <div class="photo-box flex-1">
+                <div class="photo-icon">📸</div>
+                <span>Action shot</span>
+              </div>
+              <div class="photo-box flex-1">
+                <div class="photo-icon">📸</div>
+                <span>Team photo</span>
+              </div>
+            </div>
+          </div>
+          <div class="pull-quote" style="margin-top:16px;">
+            <div class="pq-text">"No experience required. Showing up is the qualification."</div>
+          </div>
+          <div class="note">
+            <strong>Submit your Football Classic photos</strong>
+            Best action shots and team photos welcome. Form coming soon.
+          </div>
+          <div class="pg-num" style="right:24px;">11</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 6: SONGS -->
+      <div class="spread" data-spread="6">
+        <div class="page page-left pg">
+          <div class="sec-label sl-red">06 — The Playlist</div>
+          <div class="sec-h">Songs we <em>loved</em> this year.</div>
+          <div class="sec-sub">The soundtrack to late nights, library sessions, and everything in between. Submitted by LUL students.</div>
+          <div class="song"><div class="song-n">01</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y1</div></div></div>
+          <div class="song"><div class="song-n">02</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y2</div></div></div>
+          <div class="song"><div class="song-n">03</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y3</div></div></div>
+          <div class="song"><div class="song-n">04</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y1</div></div></div>
+          <div class="song"><div class="song-n">05</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y2</div></div></div>
+          <div class="note mt-auto">
+            <strong>Submit your song of the year</strong>
+            The one that got you through. Form coming soon.
+          </div>
+          <div class="pg-num">12</div>
+        </div>
+        <div class="page page-right pg">
+          <div class="song"><div class="song-n">06</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y3</div></div></div>
+          <div class="song"><div class="song-n">07</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y1</div></div></div>
+          <div class="song"><div class="song-n">08</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y2</div></div></div>
+          <div class="song"><div class="song-n">09</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y3</div></div></div>
+          <div class="song"><div class="song-n">10</div><div><div class="song-t">Song title goes here</div><div class="song-a">Artist · Submitted by Y1</div></div></div>
+          <div class="photo-box flex-1 mt-auto" style="min-height:80px;">
+            <div class="photo-icon">🎵</div>
+            <span>Add a Spotify playlist QR code or link here</span>
+          </div>
+          <div class="pg-num" style="right:24px;">13</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 7: MEMORIES -->
+      <div class="spread" data-spread="7">
+        <div class="page page-left pg">
+          <div class="sec-label sl-black">07 — Memories</div>
+          <div class="sec-h">The ones we'll <em>actually remember.</em></div>
+          <div class="sup"><div class="sup-label">Most Likely to be CEO</div><div class="sup-name">Name Here</div></div>
+          <div class="sup"><div class="sup-label">Most Likely to Save the World</div><div class="sup-name">Name Here</div></div>
+          <div class="sup"><div class="sup-label">Best Dressed</div><div class="sup-name">Name Here</div></div>
+          <div class="sup"><div class="sup-label">Always in the Library</div><div class="sup-name">Name Here</div></div>
+          <div class="sup"><div class="sup-label">Forbes 30 Under 30</div><div class="sup-name">Name Here</div></div>
+          <div class="note mt-auto">
+            <strong>Nominate your classmates</strong>
+            Superlative voting form coming soon.
+          </div>
+          <div class="pg-num">14</div>
+        </div>
+        <div class="page page-right pg">
+          <div class="sec-label sl-cream">Quotes from the Year</div>
+          <div class="pull-quote">
+            <div class="pq-text">"A memorable quote from the year goes here — funny, chaotic, or accidentally profound."</div>
+            <div class="pq-author">— Name, Year</div>
+          </div>
+          <div class="pull-quote">
+            <div class="pq-text">"Another one. These can be from a lecture, a group chat, or 2am in the kitchen."</div>
+            <div class="pq-author">— Name, Year</div>
+          </div>
+          <div class="pull-quote">
+            <div class="pq-text">"The one that everyone who was there will immediately recognise."</div>
+            <div class="pq-author">— Name, Year</div>
+          </div>
+          <div class="photo-box flex-1 mt-auto" style="min-height:80px;">
+            <div class="photo-icon">📸</div>
+            <span>Add a group photo here</span>
+          </div>
+          <div class="pg-num" style="right:24px;">15</div>
+        </div>
+      </div>
+
+      <!-- SPREAD 8: NETWORKING -->
+      <div class="spread" data-spread="8">
+        <div class="page page-left pg">
+          <div class="sec-label sl-red">08 — Networking Directory</div>
+          <div class="sec-h">Your future <em>network</em> starts here.</div>
+          <div class="sec-sub">The people you studied with are the colleagues you'll work with. Connect before graduation, not after.</div>
+          <div class="net-row" style="font-size:9px;font-weight:700;color:var(--mid);border-bottom:2px solid var(--black);padding-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;">
+            <span>Name & Degree</span><span>Field of Interest</span><span>Connect</span>
+          </div>
+          <div class="net-row"><div><div class="net-name">Full Name</div><div class="net-field">BSc Business Management · Y2</div></div><div class="net-field">Finance & Sustainability</div><a href="#" class="net-link">LinkedIn</a></div>
+          <div class="net-row"><div><div class="net-name">Full Name</div><div class="net-field">BSc Business Management · Y3</div></div><div class="net-field">Consulting & Strategy</div><a href="#" class="net-link">LinkedIn</a></div>
+          <div class="net-row"><div><div class="net-name">Full Name</div><div class="net-field">BSc Business Management · Y1</div></div><div class="net-field">Marketing & Branding</div><a href="#" class="net-link">LinkedIn</a></div>
+          <div class="note mt-auto">
+            <strong>Add yourself to the directory</strong>
+            Name, year, field of interest, LinkedIn. Form coming soon.
+          </div>
+          <div class="pg-num">16</div>
+        </div>
+        <div class="page page-right pg dark-page">
+          <div style="margin-top:auto;">
+            <div style="font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,56px);font-weight:900;color:white;line-height:1.05;margin-bottom:24px;">Until next<br><em style="color:rgba(255,255,255,0.3);">year.</em></div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.8;max-width:280px;">LUL Student Yearbook 2026/27 · Vol. I<br>Leipzig, Germany<br><br>A student-led initiative by the LUL Student Committee. Not an official publication of Lancaster University.</div>
+          </div>
+          <div class="pg-num" style="right:24px;color:rgba(255,255,255,0.3);">17</div>
+        </div>
+      </div>
+
+    </div><!-- end book -->
+    <button class="nav-arrow" id="nextBtn" onclick="changePage(1)">›</button>
+  </div>
+
+  <div class="book-footer">
+    <div class="page-dots" id="dots"></div>
+    <div class="page-counter" id="counter">1 / 9</div>
+  </div>
+</div>
+
+<script>
+const totalSpreads = 9;
+let current = 0;
+let dragStartX = 0;
+
+// Build dots
+const dotsEl = document.getElementById('dots');
+for (let i = 0; i < totalSpreads; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goToSpread(i);
+  dotsEl.appendChild(d);
+}
+
+function goToSpread(n) {
+  if (n < 0 || n >= totalSpreads) return;
+  document.querySelectorAll('.spread').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === n));
+  document.querySelector(`[data-spread="${n}"]`).classList.add('active');
+  document.getElementById('prevBtn').disabled = n === 0;
+  document.getElementById('nextBtn').disabled = n === totalSpreads - 1;
+  document.getElementById('counter').textContent = `${n + 1} / ${totalSpreads}`;
+  current = n;
+}
+
+function changePage(dir) { goToSpread(current + dir); }
+
+// Drag to turn
+const book = document.getElementById('book');
+book.addEventListener('mousedown', e => { dragStartX = e.clientX; });
+book.addEventListener('mouseup', e => {
+  const diff = e.clientX - dragStartX;
+  if (Math.abs(diff) > 40) changePage(diff < 0 ? 1 : -1);
+});
+book.addEventListener('touchstart', e => { dragStartX = e.touches[0].clientX; }, {passive:true});
+book.addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].clientX - dragStartX;
+  if (Math.abs(diff) > 40) changePage(diff < 0 ? 1 : -1);
+});
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') changePage(1);
+  if (e.key === 'ArrowLeft') changePage(-1);
+});
+</script>
+</body>
+</html>
